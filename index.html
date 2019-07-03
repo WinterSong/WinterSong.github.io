@@ -423,31 +423,14 @@
 
       
         
-          
-            <h2 id="Flow模型"><a href="#Flow模型" class="headerlink" title="Flow模型"></a>Flow模型</h2><p>$$<br>x \leftrightarrow z \sim \mathcal{N}(0,1)(\text{maybe})<br>$$<br>同样使用MLE优化：<br>$$\underset{\theta}{\arg\min}\mathbb{E}_x [-\log p_\theta (x)]$$<br>与VAE和GAN不同的是，Flow模型选择将分布通过流的形式直接计算出来。<br>$$<br>p_\theta(x)=p(z) \frac{dz}{dx}=p(f_\theta(x))\left|\frac{\partial f_\theta(x)}{\partial x}\right|\<br>\log P_\theta (x)=\log P(f_\theta (x))+\log \left| \det \left[\frac{\partial f_\theta(x)}{\partial x}\right]\right|<br>$$<br>其实直观理解我觉得可以是：流是一种替换原始分布的工具，在替换的过程中一部分的能量转移到了流变化（体积）所需要的能量中（第二项）。</p>
-<p>因此Flow模型的两个要求条件是：1. 流函数可逆，2. 雅可比行列式容易计算。</p>
-<h2 id="NICE-Non-independent-component-Estimation"><a href="#NICE-Non-independent-component-Estimation" class="headerlink" title="NICE: Non-independent component Estimation"></a>NICE: Non-independent component Estimation</h2><p>针对Flow模型相对比较难求解的第二个问题，NICE给出的解决方法是：<br>构造一个结构是三角阵的雅可比，那么其行列式计算结果为对角线元素积。</p>
-<p>构造方法如下：<br>$$<br>     \begin{cases}<br>         h_1 = x_1\\<br>         h_2 = x_2 + m(x_1)<br>     \end{cases}<br>$$<br>则对应的雅可比矩阵行列式为</p>
-<p>$$<br>\left| \left[ \frac{\partial h}{\partial x} \right] \right| =<br>  \left| \left(<br>      \begin{matrix}<br>         I_d &amp; 0 \\<br>         \frac{\partial m}{\partial x_1} &amp; I_{d:m}<br>      \end{matrix}<br>  \right) \right|<br>$$<br>逆变换为：<br>$$<br>      \begin{cases}<br>      x_1 = h_1 \\<br>      x_2 = h_2 - m(h_1)<br>      \end{cases}<br>$$</p>
-<p>流变换可以以层的形式叠加作用。<br>对应的雅可比行列式也可以直接乘起来。</p>
-<p>为了引入非线性处理方式，这里引入错位，即随机交换 $x_1$, $x_2$。</p>
-<p>之后作者为了解决维度浪费的问题，引入了尺度变换层s，实际上是一个与输入同等维度大小的系数。<br>这里雅可比矩阵就变成了s对角元素。</p>
-<h2 id="RealNVP-real-valued-non-volume-preserving-实值非体积保持"><a href="#RealNVP-real-valued-non-volume-preserving-实值非体积保持" class="headerlink" title="RealNVP: real-valued non-volume preserving (实值非体积保持)"></a>RealNVP: real-valued non-volume preserving (实值非体积保持)</h2><p>这篇paper里，作者提出了更加一般的Flow版本，构建方式如下：<br>$$<br>      \begin{cases}<br>        h_1 = x_1\\<br>        h_2 = s(x_1)\cdot x_2+t(x_1)<br>      \end{cases}<br>$$<br>对应的雅克比矩阵的行列式为：<br>$$<br>  \left|<br>  \left(<br>      \begin{array}{l}<br>        \mathbf{I} &amp; 0\\<br>        \left[\frac{ \partial h_2}{ \partial x_1 } \right] &amp; \mathbf{diag}(s(x_1))<br>      \end{array}<br>  \right)<br>  \right|<br>$$</p>
-<p>在混合信息流的方式上，从原先的在通道上反转交换变成了在通道上随机shuffle。并且在前作（NICE）基础上引入了卷积层。</p>
-<p>为了能够增强随机性，作者提出了增多通道的方式，利用名叫squeeze的方法实现。<br>并且这种方法还可以解决某些单通道灰阶图通道数不够的问题。</p>
-<p>在每一个流层上，作者使用了多尺度的通道结构：<br><img src="https://ws1.sinaimg.cn/large/006tNc79ly1g1uiitq9wxj30940f574p.jpg" alt></p>
-<h2 id="GLOW-Generative-Flow"><a href="#GLOW-Generative-Flow" class="headerlink" title="GLOW: Generative Flow"></a>GLOW: Generative Flow</h2><p>该篇论文中，作者混合信息流的方法从RealNVP的shuffle变成了可逆的$1\times 1$卷积。<br>该卷积方法即对每个通道使用相同的同样的权重来生成新的混合信息流。</p>
-<p>另外作者加入了ActNorm，即<br>$$<br>  \hat{z} = \frac{z-\mu}{\sigma}<br>$$<br>其中 $\mu$, $\sigma$是可以训练的参数。</p>
-<p>整体的流程如下：<br><img src="https://ws3.sinaimg.cn/large/006tNc79ly1g1uivzv9j9j30hb03vmxa.jpg" alt></p>
-<blockquote>
-<p>question: why use square loss?</p>
-</blockquote>
-<p>encoder为：<br><img src="https://ws4.sinaimg.cn/large/006tNc79ly1g1uj3xtl87j30j1051wet.jpg" alt></p>
-<p>其中的revnet为：<br><img src="https://ws4.sinaimg.cn/large/006tNc79ly1g1uj4joztaj30jk0890t9.jpg" alt></p>
-<p>其中的split2d为：<br><img src="https://ws1.sinaimg.cn/large/006tNc79ly1g1uj51nr92j30j108owey.jpg" alt></p>
-<p>而f为：<br><img src="https://ws4.sinaimg.cn/large/006tNc79gy1g1uje80yy9j30ef04xt93.jpg" alt></p>
-
-          
+          <p>本文介绍了集中Flow 模型。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/07/03/flows/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
