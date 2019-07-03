@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="背景综述变分推断是一种近似推断，主要针对后验分布$p(z|x)$比较难求而提出。该后验分布的作用在于可以探究隐藏在数据分布$x$之后的隐变量$z$，在变分推断中利用$q(z;x)$近似分布。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="变分推断的一些知识">
+<meta property="og:url" content="http://yoursite.com/2019/07/03/Variation/index.html">
+<meta property="og:site_name" content="Zhenyu">
+<meta property="og:description" content="背景综述变分推断是一种近似推断，主要针对后验分布$p(z|x)$比较难求而提出。该后验分布的作用在于可以探究隐藏在数据分布$x$之后的隐变量$z$，在变分推断中利用$q(z;x)$近似分布。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://ws1.sinaimg.cn/large/006tKfTcly1g1pobxsitsj308w03f0st.jpg">
+<meta property="og:image" content="https://ws4.sinaimg.cn/large/006tKfTcly1g1pttk9ymnj30v60l2djp.jpg">
+<meta property="og:image" content="https://ws2.sinaimg.cn/large/006tKfTcgy1g1pzphaci9j319k0dk0xc.jpg">
+<meta property="og:image" content="https://ws3.sinaimg.cn/large/006tKfTcgy1g1pzpzjmjgj319e09qtb2.jpg">
+<meta property="og:updated_time" content="2019-07-03T07:16:59.294Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="变分推断的一些知识">
+<meta name="twitter:description" content="背景综述变分推断是一种近似推断，主要针对后验分布$p(z|x)$比较难求而提出。该后验分布的作用在于可以探究隐藏在数据分布$x$之后的隐变量$z$，在变分推断中利用$q(z;x)$近似分布。">
+<meta name="twitter:image" content="https://ws1.sinaimg.cn/large/006tKfTcly1g1pobxsitsj308w03f0st.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/07/03/Variation/">
+
+
+
+
+
+  <title>变分推断的一些知识 | Zhenyu</title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zhenyu</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/03/Variation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhenyu Duan">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zhenyu">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">变分推断的一些知识</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-03T14:29:52+08:00">
+                2019-07-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="背景综述"><a href="#背景综述" class="headerlink" title="背景综述"></a>背景综述</h2><p>变分推断是一种近似推断，主要针对后验分布$p(z|x)$比较难求而提出。该后验分布的作用在于可以探究隐藏在数据分布$x$之后的隐变量$z$，在变分推断中利用$q(z;x)$近似分布。</p>
+<a id="more"></a>
+<blockquote>
+<p>$q(z;\theta)$和$q(z|x)$的区别在于后者是一个可以学习的参数，而不是固定的某个变量。</p>
+</blockquote>
+<blockquote>
+<p>KL散度是用来度量两种分布之间的“距离”的方法。定义：<br>$\mathcal{KL}(P||Q) = \Sigma_{x\in X} p(x)\log\frac{p(x)}{q(x)}$。<br>同时$\mathcal{KL}(P||Q) = \Sigma_x p(x)\log{p(x)}-\Sigma_x p(x)\log q(x)$，在信息学上的理解为：对于满足$P$分布的$x$使用$Q$分布编码（交叉熵定义：$-\Sigma_x p(x)\log q(x)$）的长度之差。KL散度是一个非负值，而且P和Q是非对称的。</p>
+<p><img src="https://ws1.sinaimg.cn/large/006tKfTcly1g1pobxsitsj308w03f0st.jpg" alt="熵($H_q$)与KL散度$D_q$,交叉熵$H$的关系)"></p>
+<p>熵$H_q$与KL散度$D_q$,交叉熵$H$的关系</p>
+<p>P.S. 从这里可以看出交叉熵作为loss其实就是当前神经网络编码结果同标签真是分布之间的差距。</p>
+</blockquote>
+<blockquote>
+<p>以下部分参考自苏剑林的paper《Variatiaonal Inference: A Unified Framework of Generative Models and Some Revelations》中。</p>
+</blockquote>
+<p>在生成模型中，一般需要最小化交叉熵$\Sigma_x-p(x)\log q(x)$，等价于最小化KL散度$KL(\widetilde{p}(x)|| q(x))$。表示最小化生成模型分布$q(x)$和真实分布$p(x)$。<br>变分推断利用联合分布$p(x,z)$和$q(x,z)$代替原先的边界分布。并可以证明该替代是一种上界。<br>$$\begin{aligned}KL(p(x,z)||q(x,z))=&amp; \iint p(x,z)\log \frac{p(x,z)}{q(x,z)}dx dz\\<br>=&amp;\iint p(x,z)(\log p(x,z)-\log q(x,z))dxdz\\<br>=&amp;\iint p(x)p(z|x)(\log p(x)+\log p(z|x))\\&amp;-p(x)p(z|x)(\log q(x)+\log q(z|x)) dxdz\\<br>=&amp;\iint p(x)p(z|x)\log \frac{p(x)}{q(x)} + p(x)p(z|x)log\frac{p(z|x)}{q(z|x)} dxdz\\<br>=&amp; KL(p(x)||q(x)) + \int p(x)KL(p(z|x)||q(z|x))dx\\<br>\geq &amp; KL(p(x)||q(x))<br>\end{aligned}$$</p>
+<p>这里可以有一种几何解释：<br><img src="https://ws4.sinaimg.cn/large/006tKfTcly1g1pttk9ymnj30v60l2djp.jpg" alt></p>
+<p>如图，即P和Q两种分布条件下，在指定z后比单独指定x可能KL距离更远。当然KL散度不能直接当成一种距离来看。</p>
+<p>接着当前的GAN和VAE乃至EM算法都可以被归纳为当前框架中。</p>
+<h2 id="VAE框架"><a href="#VAE框架" class="headerlink" title="VAE框架"></a>VAE框架</h2><h3 id="传统VAE推导"><a href="#传统VAE推导" class="headerlink" title="传统VAE推导"></a>传统VAE推导</h3><h3 id="变分框架下的VAE"><a href="#变分框架下的VAE" class="headerlink" title="变分框架下的VAE"></a>变分框架下的VAE</h3><p>在该框架下，优化的目标是：<br>$$\begin{aligned}<br>KL(p(x,z)||q(x,z)) =&amp; \iint p(x)p(z|x)\log\frac{p(x)p(z|x)}{q(x|z)q(z)}dxdz \\<br>&amp;(p(x)\text{ has nothing to do with optimization.}) \\<br>=&amp; \mathbb{E}_{x\sim p(x)} \left[-\int p(z|x)\log q(x|z)dz + KL(p(z|x)||q(z)) \right]\\<br>&amp;(\text{reparameterization trick})\\<br>=&amp;\mathbb{E}_{x\sim p(x)} \left[ -\log q(x|z)+KL(p(z|x)||q(z)) \right]<br>\end{aligned}$$</p>
+<p>其中利用重采样技巧, 通过采样一个点完成对$\int p(z|x)\log q(x|z)dz$的估算。可以看到最后的结果中，第一项是重建误差，第二项是KL散度。</p>
+<h2 id="EM算法"><a href="#EM算法" class="headerlink" title="EM算法"></a>EM算法</h2><h3 id="传统EM算法推导"><a href="#传统EM算法推导" class="headerlink" title="传统EM算法推导"></a>传统EM算法推导</h3><p>为了最大化$\log p(x)$可以有如下优化策略：<br>$$<br>\begin{aligned}<br>\log p(x) =&amp; \log \int p(x,z) dz\\<br>=&amp;\log \int q(z|x)\frac{p(x,z)}{q(z|x)}dz\\<br>\geq&amp; \int q(z|x)\log\frac{p(x,z)}{q(z|x)}dz \text{ (Jasen’s inequality)}\\<br>= &amp;\mathbb{H}(q(z|x)) + \int q(z|x)\log p(z)p(x|z)dz<br>\end{aligned}$$</p>
+<p>该不等式的结果是一个下界，因此不断的优化该下界，可以使$\log p(x)$最大。<br>而对EM算法而言，$q(z|x)$是E步，用来猜测隐变量，而$\log p(x,z)$ 是M步，用来在给定$z$的条件下最大化$x$的概率条件下更新模型。</p>
+<h3 id="变分框架下的EM算法"><a href="#变分框架下的EM算法" class="headerlink" title="变分框架下的EM算法"></a>变分框架下的EM算法</h3><p>最小化优化目标如下：<br>$$\begin{aligned}<br>KL(q(x,z) || p(x,z)) = &amp; \iint q(x,z)\log \frac{q(x,z)}{p(x,z)}dxdz\\<br>=&amp; \iint q(z|x)q(x)\log \frac{q(z|x)q(x)}{p(x,z)}dxdz\\<br>\sim&amp; \mathbb{E}_{x\sim q(x)}\int q(z|x)\log \frac{q(z|x)}{p(x,z)}dz\\<br>\end{aligned}<br>$$</p>
+<p>在优化过程中，首先固定$q(z|x)$，优化$p(x|z)$ (M step)。之后固定$p(x,z)$，更新$q(z|x)$.这一步就是E-step。并且证明了在E步存在最优解。</p>
+<h2 id="GAN"><a href="#GAN" class="headerlink" title="GAN"></a>GAN</h2><h3 id="传统GAN框架loss公式"><a href="#传统GAN框架loss公式" class="headerlink" title="传统GAN框架loss公式"></a>传统GAN框架loss公式</h3><p>最简单的GAN框架即一个最大最小化损失函数：<br>$$ \min_G \max_D \mathbb{E}_{x\sim p_{data}(x)}[\log D(x)] + \mathbb{E}_{z\sim p_z(z)} \log (1-D(G(z)))$$</p>
+<p>我对这个式子的理解仅仅局限于一种人造的极大极小博弈过程。背后是否有具体数学推导过程不是很了解。</p>
+<h3 id="变分框架下的GAN模型"><a href="#变分框架下的GAN模型" class="headerlink" title="变分框架下的GAN模型"></a>变分框架下的GAN模型</h3><p>不同于VAE中将q(x|z)选择为高斯分布，GAN的选择是:<br>$$<br>q(x|z) = \delta (x-G(z)), q(x) =\int q(x|z)q(z)dz<br>$$<br>即，在GAN中认为z和x是一一对应的关系。<br>在GAN中引入了一个二元隐变量$y$来构成联合分布。<br>$$q(x,y) =<br>    \begin{cases}<br>        \tilde{p}(x)p_1,y=1\\<br>        q(x)p_0, y=0<br>    \end{cases}$$<br>这里可以直接取$p_1=p_2=0.5$。优化目标是：<br>$$<br>\begin{aligned}<br>    KL(q(x,y)||p(x,y)) =<br>    &amp; \int p(x)p_1\log \frac{p(x)p_1}{p(1|x)p(x)}dx +<br>    \int q(x)p_0\log \frac{q(x)p_0}{p(0|x)p(x)}dx\\<br>    \sim &amp; \int p(x)\log \frac{1}{p(1|x)}dx+\int q(x)\log \frac{q(x)}{p(0|x)p(x)}dx<br>\end{aligned}<br>$$</p>
+<p>优化成功后：<br>$$<br>q(x,y) \to p(x,y)\<br>q(x) = \Sigma_y q(x,y) \to \Sigma_y p(x,y)=p(x)<br>$$<br>即得到生成模型。</p>
+<p>设$p(1|x) = D(x)$，即判别器。<br>此时交替训练优化对象$p(y|x)$和$q(x)$:</p>
+<p>首先固定$G(z)$，即$q(x)$，优化目标为<br>$$<br>D = {\arg\min}_D -\mathbb{E}_{x\sim p(x)}[\log D(x)]-\mathbb{E}_{x\sim q(x)}[\log(1-D(x))].$$<br>$$=\arg\min_D \int p(x)\log D(x)+q(x)\log (1-D(x))dx<br>$$<br>假设D(x)可以被优化到最优点，则对上式子求导可得:<br>$D(x)= \frac{p(x)}{q^0(x)+p(x)}$. $q^0(x)$是被固定的生成器。</p>
+<p>之后固定$D(x)$优化$G(x)$，优化目标为：<br>$$G=\arg\min_G \int q(x)\log \frac{q(x)}{(1-D(x))p(x)}dx$$</p>
+<p>将$p(x)$带入loss可以得到<br>$$\int q(x)\log \frac{q(x)}{D(x)q^0(x)}dx=-\mathbb{E}_{x\sim q(x)} \log D(x)+KL(q(x)||q^0(x))$$<br>$$=-\mathbb{E}_{z\sim q(z)} \log D(G(z))+KL(q(x)||q^0(x))$$</p>
+<p>第一项是传统GAN的loss。而第二项则要求生成器的分布更新不宜太剧烈。<br><img src="https://ws2.sinaimg.cn/large/006tKfTcgy1g1pzphaci9j319k0dk0xc.jpg" alt><br><img src="https://ws3.sinaimg.cn/large/006tKfTcgy1g1pzpzjmjgj319e09qtb2.jpg" alt></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/03/flows/" rel="next" title="几种Flow模型">
+                <i class="fa fa-chevron-left"></i> 几种Flow模型
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zhenyu Duan</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#背景综述"><span class="nav-number">1.</span> <span class="nav-text">背景综述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VAE框架"><span class="nav-number">2.</span> <span class="nav-text">VAE框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#传统VAE推导"><span class="nav-number">2.1.</span> <span class="nav-text">传统VAE推导</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#变分框架下的VAE"><span class="nav-number">2.2.</span> <span class="nav-text">变分框架下的VAE</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EM算法"><span class="nav-number">3.</span> <span class="nav-text">EM算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#传统EM算法推导"><span class="nav-number">3.1.</span> <span class="nav-text">传统EM算法推导</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#变分框架下的EM算法"><span class="nav-number">3.2.</span> <span class="nav-text">变分框架下的EM算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GAN"><span class="nav-number">4.</span> <span class="nav-text">GAN</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#传统GAN框架loss公式"><span class="nav-number">4.1.</span> <span class="nav-text">传统GAN框架loss公式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#变分框架下的GAN模型"><span class="nav-number">4.2.</span> <span class="nav-text">变分框架下的GAN模型</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhenyu Duan</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  
+
+
+  
+
+  
+
+</body>
+</html>

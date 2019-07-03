@@ -79,13 +79,24 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="Zhenyu">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="Flow模型$$x \leftrightarrow z \sim \mathcal{N}(0,1)(\text{maybe})$$同样使用MLE优化：$$\underset{\theta}{\arg\min}\mathbb{E}_x [-\log p_\theta (x)]$$与VAE和GAN不同的是，Flow模型选择将分布通过流的形式直接计算出来。$$p_\theta(x)=p(z) \frac">
+<meta property="og:type" content="article">
+<meta property="og:title" content="几种Flow模型">
+<meta property="og:url" content="http://yoursite.com/2019/07/03/flows/index.html">
 <meta property="og:site_name" content="Zhenyu">
+<meta property="og:description" content="Flow模型$$x \leftrightarrow z \sim \mathcal{N}(0,1)(\text{maybe})$$同样使用MLE优化：$$\underset{\theta}{\arg\min}\mathbb{E}_x [-\log p_\theta (x)]$$与VAE和GAN不同的是，Flow模型选择将分布通过流的形式直接计算出来。$$p_\theta(x)=p(z) \frac">
 <meta property="og:locale" content="default">
+<meta property="og:image" content="https://ws1.sinaimg.cn/large/006tNc79ly1g1uiitq9wxj30940f574p.jpg">
+<meta property="og:image" content="https://ws3.sinaimg.cn/large/006tNc79ly1g1uivzv9j9j30hb03vmxa.jpg">
+<meta property="og:image" content="https://ws4.sinaimg.cn/large/006tNc79ly1g1uj3xtl87j30j1051wet.jpg">
+<meta property="og:image" content="https://ws4.sinaimg.cn/large/006tNc79ly1g1uj4joztaj30jk0890t9.jpg">
+<meta property="og:image" content="https://ws1.sinaimg.cn/large/006tNc79ly1g1uj51nr92j30j108owey.jpg">
+<meta property="og:image" content="https://ws4.sinaimg.cn/large/006tNc79gy1g1uje80yy9j30ef04xt93.jpg">
+<meta property="og:updated_time" content="2019-07-03T07:12:39.886Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Zhenyu">
+<meta name="twitter:title" content="几种Flow模型">
+<meta name="twitter:description" content="Flow模型$$x \leftrightarrow z \sim \mathcal{N}(0,1)(\text{maybe})$$同样使用MLE优化：$$\underset{\theta}{\arg\min}\mathbb{E}_x [-\log p_\theta (x)]$$与VAE和GAN不同的是，Flow模型选择将分布通过流的形式直接计算出来。$$p_\theta(x)=p(z) \frac">
+<meta name="twitter:image" content="https://ws1.sinaimg.cn/large/006tNc79ly1g1uiitq9wxj30940f574p.jpg">
 
 
 
@@ -115,13 +126,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/">
+  <link rel="canonical" href="http://yoursite.com/2019/07/03/flows/">
 
 
 
 
 
-  <title>Zhenyu</title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  <title>几种Flow模型 | Zhenyu</title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
   
 
 
@@ -140,8 +151,7 @@
     
   
 
-  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left 
-  page-home">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -214,133 +224,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/03/Variation/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zhenyu Duan">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zhenyu">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/07/03/Variation/" itemprop="url">变分推断的一些知识</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-03T14:29:52+08:00">
-                2019-07-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="背景综述"><a href="#背景综述" class="headerlink" title="背景综述"></a>背景综述</h2><p>变分推断是一种近似推断，主要针对后验分布$p(z|x)$比较难求而提出。该后验分布的作用在于可以探究隐藏在数据分布$x$之后的隐变量$z$，在变分推断中利用$q(z;x)$近似分布。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/07/03/Variation/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
 
   
 
@@ -370,9 +256,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/07/03/flows/" itemprop="url">几种Flow模型</a></h1>
+          <h1 class="post-title" itemprop="name headline">几种Flow模型</h1>
         
 
         <div class="post-meta">
@@ -422,9 +306,7 @@
       
 
       
-        
-          
-            <h2 id="Flow模型"><a href="#Flow模型" class="headerlink" title="Flow模型"></a>Flow模型</h2><p>$$<br>x \leftrightarrow z \sim \mathcal{N}(0,1)(\text{maybe})<br>$$<br>同样使用MLE优化：<br>$$\underset{\theta}{\arg\min}\mathbb{E}_x [-\log p_\theta (x)]$$<br>与VAE和GAN不同的是，Flow模型选择将分布通过流的形式直接计算出来。<br>$$<br>p_\theta(x)=p(z) \frac{dz}{dx}=p(f_\theta(x))\left|\frac{\partial f_\theta(x)}{\partial x}\right|\<br>\log P_\theta (x)=\log P(f_\theta (x))+\log \left| \det \left[\frac{\partial f_\theta(x)}{\partial x}\right]\right|<br>$$<br>其实直观理解我觉得可以是：流是一种替换原始分布的工具，在替换的过程中一部分的能量转移到了流变化（体积）所需要的能量中（第二项）。</p>
+        <h2 id="Flow模型"><a href="#Flow模型" class="headerlink" title="Flow模型"></a>Flow模型</h2><p>$$<br>x \leftrightarrow z \sim \mathcal{N}(0,1)(\text{maybe})<br>$$<br>同样使用MLE优化：<br>$$\underset{\theta}{\arg\min}\mathbb{E}_x [-\log p_\theta (x)]$$<br>与VAE和GAN不同的是，Flow模型选择将分布通过流的形式直接计算出来。<br>$$<br>p_\theta(x)=p(z) \frac{dz}{dx}=p(f_\theta(x))\left|\frac{\partial f_\theta(x)}{\partial x}\right|\<br>\log P_\theta (x)=\log P(f_\theta (x))+\log \left| \det \left[\frac{\partial f_\theta(x)}{\partial x}\right]\right|<br>$$<br>其实直观理解我觉得可以是：流是一种替换原始分布的工具，在替换的过程中一部分的能量转移到了流变化（体积）所需要的能量中（第二项）。</p>
 <p>因此Flow模型的两个要求条件是：1. 流函数可逆，2. 雅可比行列式容易计算。</p>
 <h2 id="NICE-Non-independent-component-Estimation"><a href="#NICE-Non-independent-component-Estimation" class="headerlink" title="NICE: Non-independent component Estimation"></a>NICE: Non-independent component Estimation</h2><p>针对Flow模型相对比较难求解的第二个问题，NICE给出的解决方法是：<br>构造一个结构是三角阵的雅可比，那么其行列式计算结果为对角线元素积。</p>
 <p>构造方法如下：<br>$$<br>     \begin{cases}<br>         h_1 = x_1\\<br>         h_2 = x_2 + m(x_1)<br>     \end{cases}<br>$$<br>则对应的雅可比矩阵行列式为</p>
@@ -447,8 +329,6 @@
 <p>其中的split2d为：<br><img src="https://ws1.sinaimg.cn/large/006tNc79ly1g1uj51nr92j30j108owey.jpg" alt></p>
 <p>而f为：<br><img src="https://ws4.sinaimg.cn/large/006tNc79gy1g1uje80yy9j30ef04xt93.jpg" alt></p>
 
-          
-        
       
     </div>
     
@@ -465,136 +345,32 @@
       
 
       
-
-      
-
       
       
-        <div class="post-eof"></div>
+
       
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/03/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zhenyu Duan">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zhenyu">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/07/03/hello-world/" itemprop="url">Hello World</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
             
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-03T14:04:10+08:00">
-                2019-07-03
-              </time>
+              <a href="/2019/07/03/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
+              </a>
             
+          </div>
 
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
             
-
+              <a href="/2019/07/03/Variation/" rel="prev" title="变分推断的一些知识">
+                变分推断的一些知识 <i class="fa fa-chevron-right"></i>
+              </a>
             
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
+          </div>
         </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/07/03/hello-world/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -604,10 +380,11 @@
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -615,6 +392,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -635,8 +416,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -678,6 +468,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Flow模型"><span class="nav-number">1.</span> <span class="nav-text">Flow模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NICE-Non-independent-component-Estimation"><span class="nav-number">2.</span> <span class="nav-text">NICE: Non-independent component Estimation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RealNVP-real-valued-non-volume-preserving-实值非体积保持"><span class="nav-number">3.</span> <span class="nav-text">RealNVP: real-valued non-volume preserving (实值非体积保持)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GLOW-Generative-Flow"><span class="nav-number">4.</span> <span class="nav-text">GLOW: Generative Flow</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -811,6 +617,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
